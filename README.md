@@ -1,0 +1,1 @@
+This task features a custom food ordering form built with HTML5, CSS3, and JavaScript for Bolaji Stores. It allows clients to place orders for vegetarian or non-vegetarian meals. Orders are processed through a custom Webhook, and instant confirmations are delivered via Webhook responses.
