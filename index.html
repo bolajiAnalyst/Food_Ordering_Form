@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Order Form</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            color: #1f2937;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <!-- Main Container -->
+    <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-2xl border border-gray-200">
+        <h1 class="text-3xl font-bold text-center mb-6 text-gray-800">Welcome to Salaam Food Hub</h1>
+        <p class="text-center text-gray-500 mb-8"> Please fill out the form below to place your food order. Your order will be processed instantly!</p>
+
+        <!-- Order Form -->
+        <form id="orderForm" class="space-y-6">
+            <!-- Name and Email -->
+            <div class="flex flex-col sm:flex-row gap-4">
+                <div class="w-full">
+                    <label for="customerName" class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                    <input type="text" id="customerName" name="customerName" required
+                           class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors">
+                </div>
+                <div class="w-full">
+                    <label for="customerEmail" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <input type="email" id="customerEmail" name="customerEmail" required
+                           class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors">
+                </div>
+            </div>
+
+            <!-- Food Type Selection -->
+            <div>
+                <span class="block text-sm font-medium text-gray-700 mb-2">Food Type</span>
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <label class="flex items-center space-x-2 cursor-pointer bg-gray-100 p-3 rounded-lg border border-gray-200 hover:bg-gray-200 transition-colors">
+                        <input type="radio" name="foodType" value="vegetarian" required class="form-radio text-green-500 focus:ring-green-500">
+                        <span>Vegetarian</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer bg-gray-100 p-3 rounded-lg border border-gray-200 hover:bg-gray-200 transition-colors">
+                        <input type="radio" name="foodType" value="non-vegetarian" required class="form-radio text-red-500 focus:ring-red-500">
+                        <span>Non-Vegetarian</span>
+                    </label>
+                </div>
+            </div>
+            
+            <!-- Food Item Lists (Dynamically shown) -->
+            <div id="foodLists" class="space-y-4">
+                <div id="vegetarianList" class="hidden">
+                    <span class="block text-sm font-medium text-gray-700 mb-2">Select your Vegetarian items:</span>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                        <label class="flex items-center space-x-2"><input type="checkbox" name="vegItems" value="fruits" class="rounded text-indigo-600"><span>Fruits</span></label>
+                        <label class="flex items-center space-x-2"><input type="checkbox" name="vegItems" value="vegetables" class="rounded text-indigo-600"><span>Vegetables</span></label>
+                        <label class="flex items-center space-x-2"><input type="checkbox" name="vegItems" value="grains" class="rounded text-indigo-600"><span>Grains</span></label>
+                        <label class="flex items-center space-x-2"><input type="checkbox" name="vegItems" value="nuts" class="rounded text-indigo-600"><span>Nuts</span></label>
+                        <label class="flex items-center space-x-2"><input type="checkbox" name="vegItems" value="seeds" class="rounded text-indigo-600"><span>Seeds</span></label>
+                    </div>
+                </div>
+
+                <div id="nonVegetarianList" class="hidden">
+                    <span class="block text-sm font-medium text-gray-700 mb-2">Select your Non-Vegetarian items:</span>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                        <label class="flex items-center space-x-2"><input type="checkbox" name="nonVegItems" value="beef" class="rounded text-indigo-600"><span>Beef</span></label>
+                        <label class="flex items-center space-x-2"><input type="checkbox" name="nonVegItems" value="chicken" class="rounded text-indigo-600"><span>Chicken</span></label>
+                        <label class="flex items-center space-x-2"><input type="checkbox" name="nonVegItems" value="fish" class="rounded text-indigo-600"><span>Fish</span></label>
+                        <label class="flex items-center space-x-2"><input type="checkbox" name="nonVegItems" value="eggs" class="rounded text-indigo-600"><span>Eggs</span></label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit"
+                    class="w-full flex justify-center items-center py-3 px-4 rounded-lg bg-indigo-600 text-white font-semibold shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-transform transform hover:scale-105">
+                Place Order
+            </button>
+        </form>
+
+        <!-- Status Message -->
+        <div id="statusMessage" class="mt-6 text-center text-sm font-medium p-4 rounded-lg hidden"></div>
+    </div>
+
+    <!-- JavaScript for form submission -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('orderForm');
+            const statusMessage = document.getElementById('statusMessage');
+            const foodTypeInputs = document.querySelectorAll('input[name="foodType"]');
+            const vegetarianList = document.getElementById('vegetarianList');
+            const nonVegetarianList = document.getElementById('nonVegetarianList');
+
+            // !! IMPORTANT: Replace this URL with your Make.com webhook URL !!
+            const webhookUrl = "YOUR_MAKE_WEBHOOK_URL_HERE"; 
+
+            // Function to show/hide the food lists based on radio button selection
+            const toggleFoodLists = () => {
+                const selectedFoodType = document.querySelector('input[name="foodType"]:checked')?.value;
+                vegetarianList.classList.add('hidden');
+                nonVegetarianList.classList.add('hidden');
+
+                if (selectedFoodType === 'vegetarian') {
+                    vegetarianList.classList.remove('hidden');
+                } else if (selectedFoodType === 'non-vegetarian') {
+                    nonVegetarianList.classList.remove('hidden');
+                }
+            };
+
+            // Add change listener to food type radio buttons
+            foodTypeInputs.forEach(input => {
+                input.addEventListener('change', toggleFoodLists);
+            });
+
+            form.addEventListener('submit', async (event) => {
+                event.preventDefault(); // Prevent default form submission
+
+                statusMessage.classList.add('hidden'); // Hide any previous messages
+
+                // Get selected food type
+                const foodType = document.querySelector('input[name="foodType"]:checked')?.value;
+
+                // Get selected food items based on the food type
+                let selectedItems = [];
+                if (foodType === 'vegetarian') {
+                    selectedItems = Array.from(document.querySelectorAll('input[name="vegItems"]:checked')).map(item => item.value);
+                } else if (foodType === 'non-vegetarian') {
+                    selectedItems = Array.from(document.querySelectorAll('input[name="nonVegItems"]:checked')).map(item => item.value);
+                }
+
+                if (selectedItems.length === 0) {
+                    statusMessage.textContent = "Please select at least one food item.";
+                    statusMessage.classList.remove('hidden');
+                    statusMessage.classList.add('bg-red-100', 'text-red-700');
+                    return;
+                }
+
+                // Gather form data
+                const orderData = {
+                    customer_name: document.getElementById('customerName').value,
+                    customer_email: document.getElementById('customerEmail').value,
+                    food_type: foodType,
+                    order_items: selectedItems, // Send as an array
+                    order_id: Math.random().toString(36).substring(2, 11) // Generate a simple unique ID
+                };
+
+                try {
+                    statusMessage.textContent = "Processing order...";
+                    statusMessage.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700');
+                    statusMessage.classList.add('bg-blue-100', 'text-blue-700', 'animate-pulse');
+
+                    const response = await fetch(webhookUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(orderData),
+                    });
+
+                    const result = await response.json();
+                    
+                    if (response.ok) {
+                        statusMessage.textContent = `Order received! ${result.message || ''}`;
+                        statusMessage.classList.remove('bg-blue-100', 'text-blue-700', 'animate-pulse');
+                        statusMessage.classList.add('bg-green-100', 'text-green-700');
+                        form.reset(); // Reset form on success
+                        toggleFoodLists(); // Hide the food list after resetting
+                    } else {
+                        throw new Error(`Server responded with status: ${response.status}`);
+                    }
+                } catch (error) {
+                    console.error('Error submitting order:', error);
+                    statusMessage.textContent = "Failed to place order. Please try again.";
+                    statusMessage.classList.remove('bg-blue-100', 'text-blue-700', 'animate-pulse');
+                    statusMessage.classList.add('bg-red-100', 'text-red-700');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
